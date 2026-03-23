@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Silsilah Keluarga Bani Maruf</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gen0: #2C1810; --gen1: #7B3F00; --gen2: #1B4F72;
+  --gen3: #145A32; --gen4: #6C3483; --gen5: #922B21;
+  --gen0-light: #F5E6D3; --gen1-light: #FDEBD0; --gen2-light: #D6EAF8;
+  --gen3-light: #D5F5E3; --gen4-light: #E8DAEF; --gen5-light: #FADBD8;
+  --bg: #FAF6F0; --paper: #FFFDF9; --ink: #1a1008;
+  --border: #C8A882; --line: #B8956A;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Serif', serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+
+/* HEADER */
+.header { background: linear-gradient(135deg,#2C1810 0%,#7B3F00 50%,#2C1810 100%); color:#F5E6D3; text-align:center; padding:28px 20px 20px; }
+.header-ornament { font-size:12px; letter-spacing:3px; opacity:0.7; margin-bottom:6px; text-transform:uppercase; }
+.header h1 { font-family:'Amiri',serif; font-size:2.4rem; font-weight:700; margin-bottom:4px; }
+.header-sub { font-size:0.85rem; opacity:0.75; font-style:italic; }
+
+/* CONTROLS */
+.controls { display:flex; justify-content:center; align-items:center; gap:10px; padding:12px 20px; background:var(--paper); border-bottom:2px solid var(--border); flex-wrap:wrap; position:sticky; top:0; z-index:100; box-shadow:0 2px 8px rgba(44,24,16,.12); }
+.btn { padding:7px 16px; border:2px solid var(--border); background:var(--paper); color:var(--ink); font-family:'Noto Serif',serif; font-size:0.84rem; cursor:pointer; border-radius:4px; transition:all .2s; font-weight:600; }
+.btn:hover { background:var(--gen1-light); border-color:var(--gen1); }
+.btn.active { background:var(--gen1); color:white; border-color:var(--gen1); }
+.btn-edit { background:var(--gen2-light); border-color:var(--gen2); color:var(--gen2); }
+.btn-edit:hover,.btn-edit.active { background:var(--gen2); color:white; }
+.btn-print { background:var(--gen3-light); border-color:var(--gen3); color:var(--gen3); }
+.btn-print:hover { background:var(--gen3); color:white; }
+.search-box { padding:7px 12px; border:2px solid var(--border); border-radius:4px; font-family:'Noto Serif',serif; font-size:0.84rem; background:var(--paper); width:190px; }
+.search-box:focus { outline:none; border-color:var(--gen2); }
+
+/* LEGEND */
+.legend { display:flex; justify-content:center; gap:12px; padding:8px 20px; background:var(--paper); flex-wrap:wrap; border-bottom:1px solid var(--border); font-size:0.74rem; }
+.legend-item { display:flex; align-items:center; gap:5px; }
+.legend-dot { width:11px; height:11px; border-radius:50%; border:2px solid white; box-shadow:0 0 0 1px rgba(0,0,0,.2); }
+
+/* LIST VIEW */
+#view-list { max-width:920px; margin:0 auto; padding:20px 16px; }
+.simbah-box { text-align:center; padding:18px 0 4px; }
+.simbah-couple { display:inline-flex; align-items:stretch; border:2px solid var(--gen0); border-radius:10px; overflow:hidden; cursor:pointer; }
+.simbah-card { background:var(--gen0-light); padding:12px 22px; color:var(--gen0); }
+.simbah-divider { width:2px; background:var(--gen0); }
+.simbah-name { font-family:'Amiri',serif; font-size:1.15rem; font-weight:700; }
+.simbah-sub { font-size:0.78rem; font-style:italic; margin-top:2px; opacity:0.8; }
+.simbah-connector { width:2px; height:22px; background:var(--line); margin:0 auto; }
+
+.list-item { display:flex; gap:10px; padding:5px 8px 5px 12px; border-left:3px solid transparent; margin-bottom:1px; cursor:pointer; border-radius:0 4px 4px 0; transition:all .15s; }
+.list-item:hover { background:var(--gen1-light); border-left-color:var(--gen1); }
+.list-item.highlight { background:#FFF3CD; border-left-color:#FFA500; }
+.list-num { font-weight:700; min-width:68px; font-size:0.79rem; flex-shrink:0; }
+.list-name { font-weight:600; }
+.list-spouse { color:#666; font-style:italic; }
+.list-info { font-size:0.75rem; color:#888; margin-top:2px; }
+.alm-mark { color:#c0392b; font-size:0.82em; }
+.indent-1{padding-left:28px} .indent-2{padding-left:56px} .indent-3{padding-left:84px} .indent-4{padding-left:112px}
+
+/* TREE VIEW */
+#view-tree { padding:16px; overflow-x:auto; }
+.scroll-hint { text-align:center; font-size:0.74rem; color:#aaa; padding:4px; font-style:italic; margin-bottom:6px; }
+.tree-wrap { display:inline-block; min-width:100%; }
+
+/* === TREE LAYOUT ENGINE === */
+.t-node { display:flex; flex-direction:column; align-items:center; }
+.t-card {
+  display:inline-flex; flex-direction:column; align-items:center;
+  padding:7px 10px; border-radius:8px; cursor:pointer;
+  transition:transform .18s, box-shadow .18s;
+  border:2px solid transparent;
+  min-width:90px; max-width:135px; text-align:center;
+  position:relative; z-index:1;
+}
+.t-card:hover { transform:translateY(-2px); box-shadow:0 4px 14px rgba(0,0,0,.18); }
+.t-name { font-weight:700; font-size:0.71rem; line-height:1.3; }
+.t-spouses { font-size:0.62rem; margin-top:3px; line-height:1.4; }
+.t-spouse-line { font-style:italic; opacity:0.85; font-size:0.71rem; }
+.t-year { font-size:0.58rem; background:rgba(255,255,255,.5); border-radius:8px; padding:1px 5px; margin-top:2px; display:inline-block; }
+.gen-0{background:var(--gen0-light);border-color:var(--gen0);color:var(--gen0);}
+.gen-1{background:var(--gen1-light);border-color:var(--gen1);color:var(--gen1);}
+.gen-2{background:var(--gen2-light);border-color:var(--gen2);color:var(--gen2);}
+.gen-3{background:var(--gen3-light);border-color:var(--gen3);color:var(--gen3);}
+.gen-4{background:var(--gen4-light);border-color:var(--gen4);color:var(--gen4);}
+.gen-5{background:var(--gen5-light);border-color:var(--gen5);color:var(--gen5);}
+.t-alm { opacity:0.68; }
+.t-alm-tag { font-size:0.6em; opacity:0.85; margin-left:2px; font-family:'Noto Serif',serif; }
+.t-gap { height:28px; }
+.t-children { display:flex; align-items:flex-start; }
+.t-child { display:flex; flex-direction:column; align-items:center; padding:0 6px; }
+/* SVG for lines — drawn after layout */
+#tree-svg { position:absolute; top:0; left:0; pointer-events:none; overflow:visible; }
+.tree-wrap { position:relative; display:inline-block; min-width:100%; }
+
+/* POPUP */
+.popup-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px; }
+.popup { background:var(--paper); border-radius:12px; padding:24px; max-width:430px; width:100%; box-shadow:0 8px 40px rgba(0,0,0,.3); border:2px solid var(--border); position:relative; animation:popIn .2s ease; max-height:88vh; overflow-y:auto; }
+@keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.popup-close { position:absolute; top:10px; right:12px; background:none; border:none; font-size:1.4rem; cursor:pointer; color:#888; }
+.popup-close:hover { color:var(--gen1); }
+.popup-badge { font-size:0.67rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:3px 10px; border-radius:20px; display:inline-block; margin-bottom:10px; border:1px solid; }
+.popup-member-name { font-family:'Amiri',serif; font-size:1.3rem; font-weight:700; color:var(--gen1); margin-bottom:3px; line-height:1.3; }
+.popup-spouse-name { font-size:0.9rem; font-weight:700; color:var(--gen2); margin-bottom:3px; }
+.popup-alm { font-size:0.72em; color:#c0392b; font-family:'Noto Serif',serif; }
+.popup-divider { border:none; border-top:1px dashed var(--border); margin:9px 0; }
+.popup-row { display:flex; align-items:baseline; gap:4px; margin-bottom:5px; font-size:0.83rem; line-height:1.4; }
+.popup-icon { flex-shrink:0; }
+.popup-val { color:#444; }
+.popup-ch-title { font-weight:700; font-size:0.75rem; color:var(--gen3); margin-bottom:5px; text-transform:uppercase; letter-spacing:1.5px; }
+.popup-ch { padding:4px 10px; font-size:0.82rem; background:var(--gen3-light); border-radius:4px; margin-bottom:3px; color:var(--gen3); cursor:pointer; font-weight:600; }
+.popup-ch:hover { background:var(--gen3); color:white; }
+
+/* EDIT */
+#view-edit { max-width:760px; margin:0 auto; padding:26px 18px; }
+.edit-title { font-family:'Amiri',serif; font-size:1.25rem; color:var(--gen2); margin-bottom:14px; border-bottom:2px solid var(--gen2); padding-bottom:6px; }
+.edit-tabs { display:flex; gap:6px; margin-bottom:16px; }
+.edit-tab { padding:6px 14px; border:2px solid var(--border); border-radius:4px; cursor:pointer; font-size:0.81rem; font-family:'Noto Serif',serif; background:var(--paper); }
+.edit-tab.active { background:var(--gen2); color:white; border-color:var(--gen2); }
+.form-group { margin-bottom:11px; }
+.form-label { display:block; font-weight:700; font-size:0.79rem; margin-bottom:3px; color:var(--gen2); }
+.form-input,.form-textarea { width:100%; padding:7px 10px; border:2px solid var(--border); border-radius:4px; font-family:'Noto Serif',serif; font-size:0.84rem; background:var(--paper); }
+.form-input:focus,.form-textarea:focus { outline:none; border-color:var(--gen2); }
+.form-textarea { min-height:65px; resize:vertical; }
+.form-row { display:flex; gap:10px; }
+.form-row .form-group { flex:1; }
+.json-editor { width:100%; min-height:360px; font-family:'Courier New',monospace; font-size:0.77rem; padding:12px; border:2px solid var(--border); border-radius:4px; background:#1a1008; color:#F5E6D3; resize:vertical; }
+.json-editor:focus { outline:none; border-color:var(--gen2); }
+.btn-save { background:var(--gen3); color:white; border-color:var(--gen3); padding:8px 22px; margin-top:7px; }
+.btn-save:hover { background:#0E4020; }
+.status-msg { padding:6px 12px; border-radius:4px; font-size:0.81rem; margin-top:7px; display:none; }
+.status-ok { background:var(--gen3-light); color:var(--gen3); display:block; }
+.status-err { background:var(--gen5-light); color:var(--gen5); display:block; }
+
+/* PANDUAN VS CODE */
+.guide-box { background:var(--gen2-light); border:2px solid var(--gen2); border-radius:8px; padding:14px 18px; margin-bottom:18px; font-size:0.82rem; }
+.guide-box h3 { color:var(--gen2); margin-bottom:8px; font-size:0.9rem; }
+.guide-box ol { padding-left:18px; line-height:1.9; }
+.guide-box code { background:rgba(27,79,114,.15); padding:2px 5px; border-radius:3px; font-family:'Courier New',monospace; font-size:0.82em; }
+
+.hidden { display:none !important; }
+
+@media print {
+  .controls,.legend,#view-edit,.popup-overlay { display:none !important; }
+  #view-tree,.tree-wrap { display:block !important; overflow:visible !important; }
+  #view-list { display:none !important; }
+  body { background:white; }
+  @page { size:A3 landscape; margin:8mm; }
+  .t-card { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-ornament">✦ Silsilah Keluarga ✦</div>
+  <h1>Bani Ma'ruf</h1>
+  <div class="header-sub">Dokumen Silsilah Keluarga — Berdasarkan Urutan Generasi </div>
+</div>
+
+<div class="controls">
+  <button class="btn active" id="btn-list" onclick="showView('list')">📋 Mode List</button>
+  <button class="btn" id="btn-tree" onclick="showView('tree')">🌳 Mode Pohon</button>
+  <button class="btn btn-edit" id="btn-edit" onclick="showView('edit')">✏️ Edit Data</button>
+  <button class="btn btn-print" onclick="doPrint()">🖨️ Cetak A3</button>
+  <input type="text" class="search-box" id="search-input" placeholder="🔍 Cari nama..." oninput="doSearch(this.value)">
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--gen0)"></div>Gen-0 Simbah</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--gen1)"></div>Gen-1 Anak</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--gen2)"></div>Gen-2 Cucu</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--gen3)"></div>Gen-3 Cicit</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--gen4)"></div>Gen-4 Piut</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--gen5)"></div>Gen-5+</div>
+  <div class="legend-item" style="font-size:0.8rem">(Alm.) = Almarhum/ah</div>
+</div>
+
+<div id="view-list"></div>
+
+<div id="view-tree" class="hidden">
+  <div class="scroll-hint">← Geser kiri/kanan untuk melihat seluruh pohon →</div>
+  <div class="tree-wrap" id="tree-wrap"><svg id="tree-svg"></svg><div id="tree-container"></div></div>
+</div>
+
+<div id="view-edit" class="hidden">
+  <div class="edit-title">✏️ Edit Data Silsilah</div>
+
+  <div class="guide-box">
+    <h3>📖 Cara Edit di Visual Studio Code</h3>
+    <ol>
+      <li>Buka VS Code → <code>File → Open File</code> → pilih <code>bani-maruf.html</code></li>
+      <li>Tekan <code>Ctrl + F</code> untuk mencari nama yang ingin diedit</li>
+      <li>Edit langsung: nama, tanggal lahir, alamat, dll. pada bagian <code>var familyData = {...}</code></li>
+      <li>Untuk simbol almarhum: cari <code>alm: true</code> atau field <code>death</code></li>
+      <li>Simpan dengan <code>Ctrl + S</code> lalu refresh browser</li>
+      <li>Gunakan <code>Ctrl + Shift + F</code> untuk format ulang kode otomatis</li>
+    </ol>
+  </div>
+
+  <div class="edit-tabs">
+    <div class="edit-tab active" id="tab-form" onclick="switchTab('form')">Form Tambah Anggota</div>
+    <div class="edit-tab" id="tab-json" onclick="switchTab('json')">Edit JSON Langsung</div>
+  </div>
+
+  <div id="panel-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Nama Lengkap *</label>
+        <input type="text" class="form-input" id="f-name" placeholder="Contoh: Ahmad Fauzi">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nama Pasangan (pisah dengan | jika >1)</label>
+        <input type="text" class="form-input" id="f-spouse" placeholder="Contoh: Fatimah | Siti (nikah 2024)">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Tanggal Lahir</label>
+        <input type="text" class="form-input" id="f-birth" placeholder="Contoh: 15 Januari 1990">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tanggal Wafat (jika ada)</label>
+        <input type="text" class="form-input" id="f-death" placeholder="Kosongkan jika masih hidup">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Alamat</label>
+      <input type="text" class="form-input" id="f-address" placeholder="Alamat tempat tinggal">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">ID Orang Tua</label>
+        <input type="text" class="form-input" id="f-parent" placeholder="Contoh: 1.1 atau 3.2">
+      </div>
+      <div class="form-group">
+        <label class="form-label">ID Baru Anggota Ini</label>
+        <input type="text" class="form-input" id="f-id" placeholder="Contoh: 1.1.4">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Catatan</label>
+      <textarea class="form-textarea" id="f-note" placeholder="Keterangan tambahan..."></textarea>
+    </div>
+    <button class="btn btn-save" onclick="addMember()">💾 Tambah Anggota</button>
+    <div class="status-msg" id="form-status"></div>
+  </div>
+
+  <div id="panel-json" class="hidden">
+    <p style="font-size:0.81rem;color:#666;margin-bottom:8px;">Edit data JSON secara langsung. Pastikan format valid sebelum menyimpan.</p>
+    <textarea class="json-editor" id="json-editor"></textarea><br>
+    <button class="btn btn-save" onclick="saveJson()">💾 Simpan</button>
+    <button class="btn" onclick="downloadJson()" style="margin-left:8px;margin-top:8px;">⬇️ Unduh JSON</button>
+    <div class="status-msg" id="json-status"></div>
+  </div>
+</div>
+
+<div id="popup-overlay" class="hidden" onclick="handleOverlayClick(event)">
+  <div class="popup" onclick="event.stopPropagation()">
+    <button class="popup-close" onclick="closePopup()">×</button>
+    <div id="popup-body"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// SIMBOL ALMARHUM — ganti di sini untuk mengubah seluruh dokumen
+// ============================================================
+var ALM_SYMBOL = '(Alm.)'; // Bisa diganti: '🌿' / 'رحمه الله' / '(Alm.)' / '✦'
+
+// ============================================================
+// DATA — spouse kini mendukung array (multi-pasangan)
+// Format spouse: string tunggal ATAU array ["Pasangan1 (almh)","Pasangan2"]
+// ============================================================
+var familyData = {
+  id:"0", name:"Ma'ruf", alm:true,
+  birth:"", death:"Januari 1986",
+  address:"",
+  note:"Kepala Keluarga Bani Ma'ruf",
+  spouses:[{name:"Ma'ruf Putri", birth:"", death:"",alm:true}],
+  children:[
+    {
+      id:"1", name:"Hj. Aminah", alm:false,
+      spouses:[{name:"M. Ilyas", birth:"", death:"", alm:true}],
+      birth:"", death:"", address:"Kadisono", note:"",
+      children:[
+        {
+          id:"1.1", name:"Bazariyah",
+          spouses:[{name:"Mujeri", birth:"", death:"", alm:true}],
+          birth:"", death:"", address:"Deresan", note:"",
+          children:[
+            {
+              id:"1.1.1", name:"Nur Arif",
+              spouses:[{name:"Rofi'ah", birth:"", death:""}],
+              birth:"", death:"", address:"", note:"",
+              children:[
+                {
+                  id:"1.1.1.1", name:"Mukaromatur Daroni",
+                  spouses:[{name:"M. Darwis", birth:"", death:""}],
+                  birth:"", death:"", address:"", note:"",
+                  children:[
+                    {id:"1.1.1.1.1",name:"Mecca Azaica Azzahra",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+                  ]
+                },
+                {id:"1.1.1.2",name:"Miftahul Huda",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+              ]
+            },
+            {
+              id:"1.1.2", name:"Muhammad Rochan",
+              spouses:[{name:"Fiena Indrasari", birth:"", death:""}],
+              birth:"", death:"", address:"", note:"",
+              children:[
+                {id:"1.1.2.1",name:"Arsita Nurfitritunisa",spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+                {id:"1.1.2.2",name:"Khaira",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+              ]
+            },
+            {
+              id:"1.1.3", name:"Muhammad Arifin",
+              spouses:[{name:"Retno Kustiyah", birth:"", death:""}],
+              birth:"", death:"", address:"", note:"",
+              children:[
+                {id:"1.1.3.1",name:"Aziz Alfareza",spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+                {id:"1.1.3.2",name:"Abiezal Kharinzain",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+              ]
+            }
+          ]
+        },
+        {
+          id:"1.2", name:"Irkhamni",
+          spouses:[{name:"Suryani", birth:"", death:"", alm:true}],
+          birth:"", death:"", address:"", note:"",
+          children:[
+            {
+              id:"1.2.1", name:"Nasrul Lufiyasari",
+              spouses:[{name:"Leo Muhammad Rumanjaya", birth:"", death:""}],
+              birth:"", death:"", address:"Watu Langkah RT.04, Ambar Ketawang Gamping", note:"",
+              children:[
+                {id:"1.2.1.1",name:"Laura Mecca Humaira",spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+                {id:"1.2.1.2",name:"Ilqham Firmansyah",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+              ]
+            }
+          ]
+        },
+        {
+          id:"1.3", name:"Umayah",
+          spouses:[{name:"Sudarmanto", birth:"", death:"", alm:true}],
+          birth:"", death:"", address:"Purworejo", note:"",
+          children:[
+            {
+              id:"1.3.1", name:"Muhammad Muhtar", spouses:[],
+              birth:"", death:"", address:"Temanggung", note:"",
+              children:[
+                {id:"1.3.1.1",name:"Muhammad Dafa",spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+                {id:"1.3.1.2",name:"Salma Khaiyura Yalfa",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+              ]
+            },
+            {id:"1.3.2",name:"Muhammad Arsyat",spouses:[{name:"Ani Ermawati", birth:"", death:""}],birth:"",death:"",address:"",note:"",children:[]},
+            {
+              id:"1.3.3", name:"Muhammad Taufik",
+              spouses:[{name:"Indah Purwanti", birth:"", death:""}],
+              birth:"", death:"", address:"", note:"",
+              children:[
+                {id:"1.3.3.1",name:"Rafan Defari Abdullah",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+              ]
+            }
+          ]
+        },
+        {
+          id:"1.4", name:"Abdul Basit",
+          spouses:[{name:"Erna Nur Ambarini", birth:"", death:"", alm:true},{name:"Martinah", birth:"", death:"", note:"nikah 11-Nov-2025"}],
+          birth:"", death:"", address:"", note:"",
+          children:[
+            {
+              id:"1.4.1", name:"M. Nur Setup Aji",
+              spouses:[{name:"Setyowaty", birth:"", death:"", note:"Tanu Ditan"}],
+              birth:"", death:"", address:"", note:"",
+              children:[
+                {id:"1.4.1.1",name:"M. Rasendria Adyasta",spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+                {id:"1.4.1.2",name:"M. Rafie Alzio",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+              ]
+            },
+            {
+              id:"1.4.2", name:"M. Khafi",
+              spouses:[{name:"Lintang Herna Flasia Pratika", birth:"", death:""}],
+              birth:"", death:"", address:"", note:"",
+              children:[
+                {id:"1.4.2.1",name:"M. Elgia Khafliando",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+              ]
+            }
+          ]
+        },
+        {
+          id:"1.5", name:"Ali Harun", alm:true, spouses:[],
+          birth:"", death:"", address:"", note:"",
+          children:[
+            {id:"1.5.1",name:"Rifqi",spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+            {id:"1.5.2",name:"Maulana",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+          ]
+        },
+        {id:"1.6",name:"Muh. Muchid",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+      ]
+    },
+    {
+      id:"2", name:"Muhammad Zawawi",
+      spouses:[{name:"Murtiningsih", birth:"23 April 1941", death:"1 November 1991", alm:true}],
+      birth:"22 Februari 1938", death:"",
+      address:"Jln. Meranti Barat VII/193 Srondol Wetan Banyumanik Semarang", note:"",
+      children:[
+        {
+          id:"2.1", name:"Achmad Farik Navis",
+          spouses:[{name:"Umi Muslihah", birth:"", death:""}],
+          birth:"", death:"",
+          address:"Ds Nglanjaran rt 06/rw 16 Candirejo Sardonoharjo Ngaglik Sleman", note:"",
+          children:[
+            {
+              id:"2.1.1", name:"Pijar Raisannisa",
+              spouses:[{name:"M. Azam Wijaya", birth:"", death:""}],
+              birth:"", death:"",
+              address:"Elit Heights Apartment 1A-18-08 Jalan Mayang Pasir 3, 11950 Pulau Penang, Malaysia", note:"",
+              children:[
+                {id:"2.1.1.1",name:"Akira Arfannaruna",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+              ]
+            },
+            {id:"2.1.2",name:"Inna Imanestia Habibah",spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+            {id:"2.1.3",name:"Ima Rahmania Aufa",spouses:[{name:"Adenanda Lisyana Hadi", birth:"", death:""}],birth:"",death:"",address:"",note:"",children:[]}
+          ]
+        },
+        {
+          id:"2.2", name:"Muhammad Uswan Husen",
+          spouses:[{name:"Mufarrahah", birth:"", death:""}],
+          birth:"", death:"",
+          address:"Perum Graha Mulia Asri I-B No. 42 rt 06/rw 18 Klipang Sendangmulyo Tembalang Semarang", note:"",
+          children:[
+            {
+              id:"2.2.1", name:"Azkia Ulki Fadilla",
+              spouses:[{name:"Achmad Tirmidzi", birth:"", death:""}],
+              birth:"", death:"",
+              address:"Komplek Kartanegara Pagas Blok A-22 rt 02 Tamanharjo Singosari Malang", note:"",
+              children:[
+                {id:"2.2.1.1",name:"Arkhan Achmad Al-Fatih",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+              ]
+            },
+            {
+              id:"2.2.2", name:"Naufal Muhammad Aqil",
+              spouses:[{name:"Fransiska Dian Kristiani", birth:"", death:""}],
+              birth:"", death:"", address:"", note:"",
+              children:[
+                {id:"2.2.2.1",name:"Belvina Almahyra Parven",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+              ]
+            },
+            {id:"2.2.3",name:"Kalila Alma Aufa",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+          ]
+        },
+        {
+          id:"2.3", name:"Yurida Hasna Ayu",
+          spouses:[{name:"Kisro Muhammad Luthfi", birth:"", death:""}],
+          birth:"", death:"",
+          address:"Ds Kuripan kel. Kuripan kec. Watumalang Wonosobo", note:"",
+          children:[
+            {id:"2.3.1",name:"Khansa Najma Kinana",spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+            {id:"2.3.2",name:"Aila Salma Hanina",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+          ]
+        }
+      ]
+    },
+    {
+      id:"3", name:"H. Muchammad Asrori Ma'ruf", alm:true,
+      spouses:[{name:"Hj. Siti Chalimah", birth:"9 Juli 1950", death:""}],
+      birth:"2 Juli 1941", death:"21 Februari 2022",
+      address:"Jl. Jend. Sudirman 116 Bantul", note:"",
+      children:[
+        {
+          id:"3.1", name:"M. Haris Aulawi",
+          spouses:[{name:"Diah Widiyati", birth:"25 Maret 1972", death:""}],
+          birth:"8 Juni 1966", death:"",
+          address:"Samirono Baru 37A Yogya", note:"",
+          children:[
+            {id:"3.1.1",name:"Raka Hafiz Farhan",spouses:[],birth:"8 Maret 1999",death:"",address:"",note:"",children:[]},
+            {id:"3.1.2",name:"Reyhan Hafizha Fahrezy",spouses:[],birth:"16 Maret 2006",death:"",address:"",note:"",children:[]}
+          ]
+        },
+        {id:"3.2",name:"Achmad Hafidz Zaky",alm:true,spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+        {
+          id:"3.3", name:"Fatchiyah Sulha",
+          spouses:[{name:"Aris Samsugito", birth:"10 Januari 1973", death:""}],
+          birth:"25 Januari 1976", death:"",
+          address:"Kadirojo RT 04, Palbapang, Bantul", note:"",
+          children:[
+            {id:"3.3.1",name:"Zidna Fadhila",spouses:[],birth:"27 September 2000",death:"",address:"",note:"",children:[]},
+            {id:"3.3.2",name:"Muhammad Zaidan Ilmi",spouses:[],birth:"21 Maret 2002",death:"",address:"",note:"",children:[]},
+            {id:"3.3.3",name:"Mizat Rifqi Ilahy",spouses:[],birth:"26 Desember 2009",death:"",address:"",note:"",children:[]},
+            {id:"3.3.4",name:"Halwa Tamara",spouses:[],birth:"31 Juli 2012",death:"",address:"",note:"",children:[]}
+          ]
+        },
+        {
+          id:"3.4", name:"Fuad Samhary",
+          spouses:[{name:"Rr. Retno Gayatri", birth:"21 April 1980", death:""}],
+          birth:"20 Juni 1979", death:"",
+          address:"Bakalan, Pendowoharjo, Sewon", note:"",
+          children:[
+            {id:"3.4.1",name:"Rr. Difla Diana Akmal",spouses:[],birth:"27 Maret 2005",death:"",address:"",note:"",children:[]},
+            {id:"3.4.2",name:"Raden Rafid Aulia Akmal",spouses:[],birth:"25 Januari 2010",death:"",address:"",note:"",children:[]},
+            {id:"3.4.3",name:"Rr. Azumi Adian Akmal",spouses:[],birth:"15 Maret 2016",death:"",address:"",note:"",children:[]}
+          ]
+        },
+        {
+          id:"3.5", name:"Husna Zumala",
+          spouses:[{name:"Riki Efendi", birth:"3 November 1986", death:""}],
+          birth:"4 Agustus 1991", death:"",
+          address:"Jl. Jend Sudirman 116 Bantul", note:"",
+          children:[
+            {id:"3.5.1",name:"Iqlima Saila Azkadina",spouses:[],birth:"26 Agustus 2017",death:"",address:"",note:"",children:[]},
+            {id:"3.5.2",name:"Inaya Nayra Azkadina",spouses:[],birth:"16 Oktober 2025",death:"",address:"",note:"",children:[]}
+          ]
+        }
+      ]
+    },
+    {
+      id:"4", name:"H.M. Asrofi Ma'ruf", alm:true,
+      spouses:[{name:"Puji Warisih", birth:"", death:""}],
+      birth:"", death:"", address:"Babadan RT 01, Bantul", note:"",
+      children:[
+        {
+          id:"4.1", name:"Nur Khasanah",
+          spouses:[{name:"Masrur", birth:"", death:""}],
+          birth:"", death:"", address:"Babadan RT 01 Bantul", note:"",
+          children:[
+            {id:"4.1.1",name:"Maulida Hasna Masruroh",spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+            {id:"4.1.2",name:"Feeza Atillah",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+          ]
+        },
+        {
+          id:"4.2", name:"Khuriah Nur Azizah",
+          spouses:[{name:"Martono", birth:"", death:""}],
+          birth:"", death:"", address:"Plumbon RT 14 Banguntapan Bantul", note:"",
+          children:[
+            {id:"4.2.1",name:"Wafa Aulia Izzati",spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+            {id:"4.2.2",name:"Faris Fadhlurrohman",spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+            {id:"4.2.3",name:"Hashfi Taufiqurrohman",spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+            {id:"4.2.4",name:"Shabrina Marha Izzati",spouses:[],birth:"",death:"",address:"",note:"",children:[]}
+          ]
+        },
+        {id:"4.3",name:"Arif Pramuji",alm:true,spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+        {id:"4.4",name:"Hasifah Nur Fitriana",spouses:[],birth:"",death:"",address:"Babadan RT 01 Bantul",note:"",children:[]}
+      ]
+    },
+    {
+      id:"5", name:"Hj. Siti Alfiah",
+      spouses:[{name:"Muhammad Ridwan", birth:"", death:"13 Juli 1981", alm:true},{name:"H. Surahman", birth:"17 September 1953", death:""}],
+      birth:"1 Agustus 1952", death:"",
+      address:"Jl. KHA Wahid Hasyim 52 Bantul Yogyakarta 55711", note:"",
+      children:[
+        {
+          id:"5.1", name:"Mohammad Munif Ridwan", alm:true,
+          spouses:[{name:"Noor Arifah", birth:"12 Mei 1971", death:""}],
+          birth:"17 Maret 1972", death:"15 November 2022",
+          address:"Jl. KHA Wahid Hasyim 52 Bantul Yogyakarta", note:"",
+          children:[
+            {id:"5.1.1",name:"Ainayya Salsabiyla",spouses:[],birth:"11 November 1999",death:"",address:"",note:"",children:[]},
+            {id:"5.1.2",name:"Maura Imania Mumtaz",spouses:[],birth:"14 Agustus 2004",death:"",address:"",note:"",children:[]},
+            {id:"5.1.3",name:"Moza Insania Munaf",spouses:[],birth:"14 Agustus 2004",death:"",address:"",note:"",children:[]}
+          ]
+        },
+        {
+          id:"5.2", name:"Mohammad Kholid Ridwan",
+          spouses:[{name:"Devi Yulianti", birth:"28 Agustus 1978", death:""}],
+          birth:"11 Juli 1974", death:"",
+          address:"Jl. Adiyaksa RT.1 Babadan Bantul Yogyakarta", note:"",
+          children:[
+            {id:"5.2.1",name:"Fairuzzaky Ramadhan",spouses:[],birth:"16 November 2001",death:"",address:"",note:"",children:[]},
+            {id:"5.2.2",name:"Firdaussyauqi Alwan",spouses:[],birth:"29 April 2004",death:"",address:"",note:"",children:[]},
+            {id:"5.2.3",name:"Fikrussamy Shafwan",spouses:[],birth:"30 Januari 2007",death:"",address:"",note:"",children:[]},
+            {id:"5.2.4",name:"Fachrunnafi Arif",spouses:[],birth:"5 Juli 2008",death:"",address:"",note:"",children:[]},
+            {id:"5.2.5",name:"Fatahillah Armani",spouses:[],birth:"22 Januari 2010",death:"",address:"",note:"",children:[]},
+            {id:"5.2.6",name:"Fahimatusshofia Ulya",spouses:[],birth:"10 Mei 2017",death:"",address:"",note:"",children:[]}
+          ]
+        },
+        {
+          id:"5.3", name:"Ulfah Noor Hidayah",
+          spouses:[{name:"Kusnanto", birth:"14 Agustus 1975", death:""}],
+          birth:"31 Maret 1977", death:"",
+          address:"Jl. HOS Cokroaminoto no. 42a Bantul Yogyakarta", note:"",
+          children:[
+            {id:"5.3.1",name:"Adelard Naufal Gibran Anandafa",spouses:[],birth:"26 Mei 2003",death:"",address:"",note:"",children:[]},
+            {id:"5.3.2",name:"Launa Aqeela Nadien Anandafa",spouses:[],birth:"14 Mei 2007",death:"",address:"",note:"",children:[]},
+            {id:"5.3.3",name:"Farah Fidelya Imtiaz Anandafa",spouses:[],birth:"20 Desember 2009",death:"",address:"",note:"",children:[]}
+          ]
+        },
+        {
+          id:"5.4", name:"Eva Hafida Nurrahmah",
+          spouses:[{name:"Suwarjono", birth:"9 Februari 1983", death:""}],
+          birth:"30 Agustus 1985", death:"",
+          address:"Jl. Dr. Sutomo 21 Badegan Bantul Yogyakarta", note:"",
+          children:[
+            {id:"5.4.1",name:"Rafif Faeyza Rasydan",spouses:[],birth:"26 November 2011",death:"",address:"",note:"",children:[]},
+            {id:"5.4.2",name:"Rafiza Fredella Radhwa",spouses:[],birth:"2 Januari 2015",death:"",address:"",note:"",children:[]},
+            {id:"5.4.3",name:"Rifaya Feisya Ramadhina",spouses:[],birth:"30 April 2020",death:"",address:"",note:"",children:[]}
+          ]
+        }
+      ]
+    },
+    {
+      id:"6", name:"H. Muhammad Masyhudi Ma'ruf",
+      spouses:[{name:"Rochmiatin", birth:"22 Mei 1957", death:""}],
+      birth:"11 Desember 1953", death:"",
+      address:"Babadan RT 01 Bantul", note:"",
+      children:[
+        {
+          id:"6.1", name:"Maya Hanifah",
+          spouses:[{name:"Amat Riyadi", birth:"6 Maret 1983", death:""}],
+          birth:"30 Mei 1983", death:"",
+          address:"Nogosari, Trirenggo, Bantul", note:"",
+          children:[
+            {id:"6.1.1",name:"Arshavin Abrar Riyadhi",spouses:[],birth:"19 Desember 2010",death:"",address:"",note:"",children:[]},
+            {id:"6.1.2",name:"Ahnaf Hanafi Ahmad",spouses:[],birth:"14 Januari 2013",death:"",address:"",note:"",children:[]},
+            {id:"6.1.3",name:"Atthoriq Roudhotul Jinan",spouses:[],birth:"13 Juli 2019",death:"",address:"",note:"",children:[]}
+          ]
+        },
+        {
+          id:"6.2", name:"Zulfa Nur Rohmah",
+          spouses:[{name:"Wibowo Saputro Nugroho", birth:"18 Januari 1988", death:""}],
+          birth:"4 Juli 1987", death:"",
+          address:"Bukit Beringin Barat B47, Wonosari, Ngaliyan, Semarang", note:"",
+          children:[
+            {id:"6.2.1",name:"Fardan Rasya Bofatra",spouses:[],birth:"7 September 2013",death:"",address:"Samarinda",note:"",children:[]},
+            {id:"6.2.2",name:"Luqman Muazzam Nugroho",spouses:[],birth:"4 Februari 2017",death:"",address:"Bantul",note:"",children:[]}
+          ]
+        },
+        {id:"6.3",name:"Muhammad Alwy",spouses:[],birth:"14 Februari 1997",death:"",address:"Babadan RT 01 Bantul",note:"",children:[]}
+      ]
+    },
+    {
+      id:"7", name:"Hj. Siti Sholihah",
+      spouses:[{name:"H. Suharman", birth:"1 Februari 1946", death:"7 Mei 2006", alm:true},{name:"H. Agus Rohieb Rozie", birth:"12 Agustus 1952", death:""}],
+      birth:"16 Agustus 1955", death:"",
+      address:"Babadan RT 01 Bantul", note:"",
+      children:[
+        {id:"7.1",name:"Noor Laila Dimna",alm:true,spouses:[],birth:"",death:"",address:"",note:"",children:[]},
+        {
+          id:"7.2", name:"Meiwan Fadhli",
+          spouses:[{name:"Sri Elvia Febrianti", birth:"20 Februari 1988", death:""}],
+          birth:"24 Mei 1987", death:"",
+          address:"Pontianak, KalBar", note:"",
+          children:[
+            {id:"7.2.1",name:"Inara Nathifa Eldhlisya",alm:true,spouses:[],birth:"25 April 2015",death:"2015",address:"Cianjur",note:"almh",children:[]},
+            {id:"7.2.2",name:"Fauzil Raffa Eldhlisya",spouses:[],birth:"28 Maret 2016",death:"",address:"Yogya",note:"",children:[]},
+            {id:"7.2.3",name:"Nazriel Arrasya Eldhlisya",spouses:[],birth:"27 Juli 2019",death:"",address:"Cianjur",note:"",children:[]}
+          ]
+        },
+        {id:"7.3",name:"Muhammad Fatwa",alm:true,spouses:[],birth:"1 Agustus 1999",death:"27 Mei 2006",address:"",note:"",children:[]}
+      ]
+    }
+  ]
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+function genLevel(id){ return id==="0"?0:id.split('.').length; }
+function genNum(id){ return Math.min(genLevel(id),5); }
+function isAlm(n){ return n.alm===true||(n.death&&n.death!==''); }
+
+// spousesOf returns array of spouse objects: {name, birth, death, alm, note}
+function spousesOf(node){
+  if(node.spouses && node.spouses.length){
+    return node.spouses.map(function(s){
+      if(typeof s === 'string'){
+        // legacy string format — convert on the fly
+        var alm = /\(alm\)|\(almh\)/i.test(s);
+        var name = s.replace(/\s*\(alm[h]?\)/gi,'').trim();
+        return {name:name, birth:'', death:'', alm:alm};
+      }
+      return s;
+    });
+  }
+  if(node.spouse) return [{name:node.spouse, birth:'', death:''}];
+  return [];
+}
+
+function isSpouseAlm(sp){
+  // sp is now an object
+  if(typeof sp === 'string') return /\(alm\)|\(almh\)/i.test(sp);
+  return sp.alm===true || (sp.death && sp.death!=='');
+}
+
+function formatSpouseForCard(sp){
+  // sp is now an object
+  if(typeof sp === 'string') return sp;
+  return sp.name;
+}
+
+function findNode(id,n){
+  if(!n) n=familyData;
+  if(n.id===id) return n;
+  if(n.children){ for(var i=0;i<n.children.length;i++){var f=findNode(id,n.children[i]);if(f)return f;} }
+  return null;
+}
+
+// ============================================================
+// LIST VIEW
+// ============================================================
+function renderList(){
+  var c=document.getElementById('view-list');
+  // Simbah couple display
+  var html='<div class="simbah-box">';
+  html+='<div class="simbah-couple">';
+  html+='<div class="simbah-card" onclick="openPopup(\'0\')">';
+  html+='<div class="simbah-name">'+familyData.name+(isAlm(familyData)?' '+ALM_SYMBOL:'')+'</div>';
+  html+='<div class="simbah-sub">Simbah Kakung</div>';
+  html+='</div>';
+  html+='<div class="simbah-divider"></div>';
+  html+='<div class="simbah-card" style="cursor:default">';
+  html+='<div class="simbah-name">'+(spousesOf(familyData)[0]||'(Simbah Putri)')+'</div>';
+  html+='<div class="simbah-sub">Simbah Putri</div>';
+  html+='</div>';
+  html+='</div>';
+  html+='<div class="simbah-connector"></div>';
+  html+='</div>';
+
+  familyData.children.forEach(function(ch){ html+=renderListNode(ch,0); });
+  c.innerHTML=html;
+}
+
+function renderListNode(node,depth){
+  var gn=genNum(node.id);
+  var colors=['--gen0','--gen1','--gen2','--gen3','--gen4','--gen5'];
+  var col='var('+colors[gn]+')';
+  var ic=depth>0?' indent-'+Math.min(depth,4):'';
+  var almMark=isAlm(node)?' <span class="alm-mark">'+ALM_SYMBOL+'</span>':'';
+  var info='';
+  if(node.birth) info+='🗓 '+node.birth;
+  if(node.death) info+=' — '+node.death;
+  if(node.address) info+=(info?' | ':'')+'📍 '+node.address;
+
+  var sp=spousesOf(node);
+  var spHtml='';
+  sp.forEach(function(sp){
+    var tag=isSpouseAlm(sp)?' <span class="alm-mark">'+ALM_SYMBOL+'</span>':'';
+    spHtml+='<span class="list-spouse"> + '+formatSpouseForCard(sp)+tag+'</span>';
+  });
+
+  var html='<div class="list-item'+ic+'" onclick="openPopup(\''+node.id+'\')">';
+  html+='<span class="list-num" style="color:'+col+'">'+node.id+'</span>';
+  html+='<div><span class="list-name">'+node.name+almMark+'</span>'+spHtml;
+  if(info) html+='<div class="list-info">'+info+'</div>';
+  html+='</div></div>';
+  if(node.children&&node.children.length) node.children.forEach(function(ch){ html+=renderListNode(ch,depth+1); });
+  return html;
+}
+
+// ============================================================
+// TREE VIEW — SVG connector lines drawn after layout
+// ============================================================
+function renderTree(){
+  var container=document.getElementById('tree-container');
+  container.innerHTML='';
+  container.appendChild(buildTreeNode(familyData));
+  // Wait for browser to finish layout, then draw SVG lines
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){
+      drawLines();
+    });
+  });
+}
+
+function buildTreeNode(node){
+  var gn=genNum(node.id);
+  var almClass=isAlm(node)?' t-alm':'';
+  var sp=spousesOf(node);
+
+  var wrap=el('div','t-node');
+  wrap.dataset.nid=node.id;
+
+  var card=el('div','t-card gen-'+gn+almClass);
+  card.onclick=(function(id){return function(){openPopup(id);};})(node.id);
+
+  // Name line
+  var nameDiv=el('div','t-name');
+  nameDiv.textContent=node.name;
+  if(isAlm(node)){
+    var almSpan=document.createElement('span');
+    almSpan.className='t-alm-tag';
+    almSpan.textContent=' '+ALM_SYMBOL;
+    nameDiv.appendChild(almSpan);
+  }
+  card.appendChild(nameDiv);
+
+  // Spouse lines (name only, alm tag if deceased)
+  sp.forEach(function(sp){
+    var spLine=el('div','t-spouse-line');
+    var spAlm=isSpouseAlm(sp);
+    spLine.textContent='+ '+formatSpouseForCard(sp);
+    if(spAlm){
+      var sTag=document.createElement('span');
+      sTag.className='t-alm-tag';
+      sTag.textContent=' '+ALM_SYMBOL;
+      spLine.appendChild(sTag);
+    }
+    card.appendChild(spLine);
+  });
+
+  wrap.appendChild(card);
+
+  if(node.children&&node.children.length>0){
+    // gap between card and children
+    wrap.appendChild(el('div','t-gap'));
+    var row=el('div','t-children');
+    node.children.forEach(function(child){
+      var col=el('div','t-child');
+      col.appendChild(el('div','t-gap')); // gap above child card (for line landing)
+      col.appendChild(buildTreeNode(child));
+      row.appendChild(col);
+    });
+    wrap.appendChild(row);
+  }
+  return wrap;
+}
+
+function el(tag,cls){
+  var e=document.createElement(tag);
+  e.className=cls;
+  return e;
+}
+
+// Draw all connector lines via SVG after layout is complete
+function drawLines(){
+  var wrap=document.getElementById('tree-wrap');
+  var svg=document.getElementById('tree-svg');
+  var wrapRect=wrap.getBoundingClientRect();
+
+  // Clear old lines
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+
+  // Set SVG size
+  svg.setAttribute('width', wrap.scrollWidth);
+  svg.setAttribute('height', wrap.scrollHeight);
+
+  // Find every parent node that has children
+  var nodes=document.querySelectorAll('#tree-container .t-node');
+  nodes.forEach(function(wrap){
+    var childRow=wrap.querySelector(':scope > .t-children');
+    if(!childRow) return;
+
+    var card=wrap.querySelector(':scope > .t-card');
+    if(!card) return;
+
+    var cardRect=card.getBoundingClientRect();
+    var parentX=cardRect.left+cardRect.width/2 - wrapRect.left + document.getElementById('view-tree').scrollLeft;
+    var parentY=cardRect.bottom - wrapRect.top;
+
+    var cols=childRow.querySelectorAll(':scope > .t-child');
+    if(!cols.length) return;
+
+    var midY=parentY+28; // midpoint of the gap
+
+    // Collect child centers
+    var childCenters=[];
+    cols.forEach(function(col){
+      var childCard=col.querySelector('.t-card');
+      if(!childCard) return;
+      var cr=childCard.getBoundingClientRect();
+      var cx=cr.left+cr.width/2 - wrapRect.left + document.getElementById('view-tree').scrollLeft;
+      var cy=cr.top - wrapRect.top;
+      childCenters.push({x:cx, top:cy});
+    });
+    if(!childCenters.length) return;
+
+    // Vertical line from parent card bottom down to midY
+    line(svg, parentX, parentY, parentX, midY);
+
+    // Horizontal line from first child center to last child center at midY
+    if(childCenters.length>1){
+      line(svg, childCenters[0].x, midY, childCenters[childCenters.length-1].x, midY);
+    }
+
+    // Vertical line from midY down to each child card top
+    childCenters.forEach(function(c){
+      line(svg, c.x, midY, c.x, c.top);
+    });
+  });
+}
+
+function line(svg, x1, y1, x2, y2){
+  var l=document.createElementNS('http://www.w3.org/2000/svg','line');
+  l.setAttribute('x1',Math.round(x1));
+  l.setAttribute('y1',Math.round(y1));
+  l.setAttribute('x2',Math.round(x2));
+  l.setAttribute('y2',Math.round(y2));
+  l.setAttribute('stroke','#B8956A');
+  l.setAttribute('stroke-width','2');
+  svg.appendChild(l);
+}
+
+window.addEventListener('resize',function(){
+  if(!document.getElementById('view-tree').classList.contains('hidden')){
+    requestAnimationFrame(drawLines);
+  }
+});
+
+// ============================================================
+// POPUP
+// ============================================================
+function openPopup(id){
+  var node=findNode(id);
+  if(!node) return;
+  var gn=genNum(node.id);
+  var labels=['Simbah (Gen-0)','Anak (Gen-1)','Cucu (Gen-2)','Cicit (Gen-3)','Piut (Gen-4)','Gen-5+'];
+  var cs=['gen0','gen1','gen2','gen3','gen4','gen5'];
+  var c=cs[gn];
+
+  var html='';
+  html+='<div class="popup-badge" style="background:var(--'+c+'-light);color:var(--'+c+');border-color:var(--'+c+')">'+labels[gn]+'</div>';
+
+  // Nama anggota + alm
+  html+='<div class="popup-member-name">'+node.name;
+  if(isAlm(node)) html+=' <span class="popup-alm">'+ALM_SYMBOL+'</span>';
+  html+='</div>';
+
+  // Lahir & wafat anggota
+  if(node.birth) html+='<div class="popup-row"><span class="popup-icon">&#128197;</span>&nbsp;Lahir&nbsp;<span class="popup-val">'+node.birth+'</span></div>';
+  if(node.death) html+='<div class="popup-row"><span class="popup-icon">🌙</span>&nbsp;Wafat&nbsp;<span class="popup-val">'+node.death+'</span></div>';
+
+  // Tiap pasangan
+  var sps=spousesOf(node);
+  sps.forEach(function(sp){
+    html+='<hr class="popup-divider">';
+    html+='<div class="popup-spouse-name">+ '+sp.name;
+    if(isSpouseAlm(sp)) html+=' <span class="popup-alm">'+ALM_SYMBOL+'</span>';
+    html+='</div>';
+    if(sp.birth) html+='<div class="popup-row"><span class="popup-icon">&#128197;</span>&nbsp;Lahir&nbsp;<span class="popup-val">'+sp.birth+'</span></div>';
+    if(sp.death) html+='<div class="popup-row"><span class="popup-icon">&#128022;</span>&nbsp;Wafat&nbsp;<span class="popup-val">'+sp.death+'</span></div>';
+    if(sp.note) html+='<div class="popup-row"><span class="popup-icon">&#128221;</span>&nbsp;<span class="popup-val">'+sp.note+'</span></div>';
+  });
+
+  // Alamat & catatan
+  html+='<hr class="popup-divider">';
+  if(node.address) html+='<div class="popup-row"><span class="popup-icon">&#128205;</span>&nbsp;Alamat&nbsp;<span class="popup-val">'+node.address+'</span></div>';
+  if(node.note) html+='<div class="popup-row"><span class="popup-icon">&#128221;</span>&nbsp;Catatan&nbsp;<span class="popup-val">'+node.note+'</span></div>';
+
+  // Anak-anak (nama saja)
+  if(node.children&&node.children.length){
+    html+='<hr class="popup-divider">';
+    html+='<div class="popup-ch-title">ANAK-ANAK ('+node.children.length+')</div>';
+    node.children.forEach(function(ch){
+      html+='<div class="popup-ch" onclick="openPopup(\''+ch.id+'\')">'+ch.name+'</div>';
+    });
+  }
+
+  document.getElementById('popup-body').innerHTML=html;
+  document.getElementById('popup-overlay').classList.remove('hidden');
+}
+
+
+function closePopup(){ document.getElementById('popup-overlay').classList.add('hidden'); }
+function handleOverlayClick(e){ if(e.target===document.getElementById('popup-overlay'))closePopup(); }
+
+// ============================================================
+// SEARCH
+// ============================================================
+function doSearch(q){
+  q=q.trim().toLowerCase();
+  document.querySelectorAll('.list-item').forEach(function(el){
+    el.classList.remove('highlight');
+    if(q&&el.textContent.toLowerCase().includes(q))el.classList.add('highlight');
+  });
+}
+
+// ============================================================
+// VIEW
+// ============================================================
+function showView(view){
+  ['list','tree','edit'].forEach(function(v){
+    document.getElementById('view-'+v).classList.add('hidden');
+    document.getElementById('btn-'+v).classList.remove('active');
+  });
+  document.getElementById('view-'+view).classList.remove('hidden');
+  document.getElementById('btn-'+view).classList.add('active');
+  if(view==='tree') renderTree();
+  if(view==='edit') document.getElementById('json-editor').value=JSON.stringify(familyData,null,2);
+}
+
+// ============================================================
+// EDIT TABS
+// ============================================================
+function switchTab(tab){
+  document.getElementById('tab-form').classList.toggle('active',tab==='form');
+  document.getElementById('tab-json').classList.toggle('active',tab==='json');
+  document.getElementById('panel-form').classList.toggle('hidden',tab!=='form');
+  document.getElementById('panel-json').classList.toggle('hidden',tab!=='json');
+  if(tab==='json') document.getElementById('json-editor').value=JSON.stringify(familyData,null,2);
+}
+
+// ============================================================
+// ADD MEMBER
+// ============================================================
+function addMember(){
+  var name=document.getElementById('f-name').value.trim();
+  var spouseRaw=document.getElementById('f-spouse').value.trim();
+  var birth=document.getElementById('f-birth').value.trim();
+  var death=document.getElementById('f-death').value.trim();
+  var address=document.getElementById('f-address').value.trim();
+  var parentId=document.getElementById('f-parent').value.trim();
+  var newId=document.getElementById('f-id').value.trim();
+  var note=document.getElementById('f-note').value.trim();
+
+  if(!name){showStatus('form-status','err','Nama tidak boleh kosong.');return;}
+  if(!newId){showStatus('form-status','err','ID tidak boleh kosong.');return;}
+
+  var spouses=spouseRaw?spouseRaw.split('|').map(function(s){return s.trim();}).filter(Boolean):[];
+  var newNode={id:newId,name:name,spouses:spouses,birth:birth,death:death,address:address,note:note,alm:!!death,children:[]};
+
+  if(!parentId||parentId==='0'){
+    familyData.children.push(newNode);
+  } else {
+    var parent=findNode(parentId);
+    if(!parent){showStatus('form-status','err','Orang tua ID "'+parentId+'" tidak ditemukan.');return;}
+    if(!parent.children)parent.children=[];
+    parent.children.push(newNode);
+  }
+  showStatus('form-status','ok','Berhasil menambahkan: '+name);
+  ['f-name','f-spouse','f-birth','f-death','f-address','f-parent','f-id','f-note'].forEach(function(id){document.getElementById(id).value='';});
+  renderList();
+}
+
+function saveJson(){
+  try{
+    familyData=JSON.parse(document.getElementById('json-editor').value);
+    showStatus('json-status','ok','JSON berhasil disimpan!');
+    renderList();
+  }catch(e){showStatus('json-status','err','JSON tidak valid: '+e.message);}
+}
+
+function downloadJson(){
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(familyData,null,2)],{type:'application/json'}));
+  a.download='bani-maruf-data.json'; a.click();
+}
+
+function showStatus(elId,type,msg){
+  var el=document.getElementById(elId);
+  el.textContent=(type==='ok'?'✅ ':'❌ ')+msg;
+  el.className='status-msg '+(type==='ok'?'status-ok':'status-err');
+}
+
+function doPrint(){
+  showView('tree');
+  setTimeout(function(){ window.print(); },800);
+}
+
+// INIT
+renderList();
+</script>
+</body>
+</html>
